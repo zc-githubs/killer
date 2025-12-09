@@ -817,6 +817,13 @@ typedef enum _SYSTEM_INFORMATION_CLASS
 
 } SYSTEM_INFORMATION_CLASS;
 
+NTSTATUS NTAPI NtQuerySystemInformation(
+    IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    IN OUT PVOID SystemInformation,
+    IN ULONG SystemInformationLength,
+    OUT PULONG ReturnLength OPTIONAL
+);
+
 
 #endif // !_STRUCTS_H
 

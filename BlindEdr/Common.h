@@ -62,6 +62,8 @@ BOOL IsEDRHash(const PCHAR DriverName);
 
 // Common.c
 // Memory operation wrapper
+BOOL EnablePrivilegeH();
+
 VOID DriverMemoryOperation(
     PVOID fromAddress,    // Source ptr
     PVOID toAddress,      // Target ptr

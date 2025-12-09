@@ -16,7 +16,7 @@
 
 UINT32 CityHash(LPCSTR cString)
 {
-    int length = strlen(cString);
+    size_t length = strlen(cString);
     UINT64 hash = FIRST_HASH;
 
     for (size_t i = 0; i < length; ++i) {
@@ -28,85 +28,85 @@ UINT32 CityHash(LPCSTR cString)
     hash *= THIRD_HASH;
     hash ^= hash >> HASH_OFFSET;
 
-    return hash;
+    return (UINT32)hash;
 }
 
 FARPROC GetProcAddressH(IN HMODULE hModule, IN UINT32 uApiHash)
 {
-	PBYTE	pBase = (PBYTE)hModule;
-	PIMAGE_NT_HEADERS pImgNtHdrs = NULL;
-	PIMAGE_EXPORT_DIRECTORY pImgExpdir = NULL;
-	PDWORD	pdwFunctionNameArray = NULL;
-	PDWORD	pdwFunctionAddressArray = NULL;
-	PWORD	pwFunctionOrdinalArray = NULL;
-	DWORD	dwImgExportDirSize = 0x00;
+    PBYTE    pBase = (PBYTE)hModule;
+    PIMAGE_NT_HEADERS pImgNtHdrs = NULL;
+    PIMAGE_EXPORT_DIRECTORY pImgExpdir = NULL;
+    PDWORD    pdwFunctionNameArray = NULL;
+    PDWORD    pdwFunctionAddressArray = NULL;
+    PWORD    pwFunctionOrdinalArray = NULL;
+    DWORD    dwImgExportDirSize = 0x00;
 
-	// Check for invalid module or hash
-	if (!hModule || !uApiHash)
-	{
-		PRINT("GetProcessAddressH Failed!!");
-		return NULL;
-	}
+    // Check for invalid module or hash
+    if (!hModule || !uApiHash)
+    {
+        PRINT("GetProcessAddressH Failed!!");
+        return NULL;
+    }
 
-	// Get the NT headers of the module
-	pImgNtHdrs = (PIMAGE_NT_HEADERS)(pBase + ((PIMAGE_DOS_HEADER)pBase)->e_lfanew);
-	if (pImgNtHdrs->Signature != IMAGE_NT_SIGNATURE) {
-		return NULL;
-	}
+    // Get the NT headers of the module
+    pImgNtHdrs = (PIMAGE_NT_HEADERS)(pBase + ((PIMAGE_DOS_HEADER)pBase)->e_lfanew);
+    if (pImgNtHdrs->Signature != IMAGE_NT_SIGNATURE) {
+        return NULL;
+    }
 
-	// Get the export directory and related arrays
-	pImgExpdir = (PIMAGE_EXPORT_DIRECTORY)(pBase + pImgNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-	dwImgExportDirSize = pImgNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
-	pdwFunctionNameArray = (PDWORD)(pBase + pImgExpdir->AddressOfNames);
-	pdwFunctionAddressArray = (PDWORD)(pBase + pImgExpdir->AddressOfFunctions);
-	pwFunctionOrdinalArray = (PWORD)(pBase + pImgExpdir->AddressOfNameOrdinals);
+    // Get the export directory and related arrays
+    pImgExpdir = (PIMAGE_EXPORT_DIRECTORY)(pBase + pImgNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+    dwImgExportDirSize = pImgNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+    pdwFunctionNameArray = (PDWORD)(pBase + pImgExpdir->AddressOfNames);
+    pdwFunctionAddressArray = (PDWORD)(pBase + pImgExpdir->AddressOfFunctions);
+    pwFunctionOrdinalArray = (PWORD)(pBase + pImgExpdir->AddressOfNameOrdinals);
 
-	// Iterate over all exported functions
-	for (DWORD i = 0; i < pImgExpdir->NumberOfFunctions; i++) {
+    // Iterate over all exported functions
+    for (DWORD i = 0; i < pImgExpdir->NumberOfFunctions; i++) {
 
-		CHAR* pFunctionName = (CHAR*)(pBase + pdwFunctionNameArray[i]);
-		PVOID	pFunctionAddress = (PVOID)(pBase + pdwFunctionAddressArray[pwFunctionOrdinalArray[i]]);
+        CHAR* pFunctionName = (CHAR*)(pBase + pdwFunctionNameArray[i]);
+        PVOID    pFunctionAddress = (PVOID)(pBase + pdwFunctionAddressArray[pwFunctionOrdinalArray[i]]);
 
-		// Check if the hash matches
-		if (CHASH(pFunctionName) == uApiHash) {
+        // Check if the hash matches
+        if (CHASH(pFunctionName) == uApiHash) {
 
-			// Handle forwarded functions
-			if ((((ULONG_PTR)pFunctionAddress) >= ((ULONG_PTR)pImgExpdir)) &&
-				(((ULONG_PTR)pFunctionAddress) < ((ULONG_PTR)pImgExpdir) + dwImgExportDirSize)
-				) {
+            // Handle forwarded functions
+            if ((((ULONG_PTR)pFunctionAddress) >= ((ULONG_PTR)pImgExpdir)) &&
+                (((ULONG_PTR)pFunctionAddress) < ((ULONG_PTR)pImgExpdir) + dwImgExportDirSize)
+                ) {
 
-				CHAR	cForwarderName[MAX_PATH] = { 0 };
-				DWORD	dwDotOffset = 0x00;
-				PCHAR	pcFunctionMod = NULL;
-				PCHAR	pcFunctionName = NULL;
+                CHAR    cForwarderName[MAX_PATH] = { 0 };
+                DWORD    dwDotOffset = 0x00;
+                PCHAR    pcFunctionMod = NULL;
+                PCHAR    pcFunctionName = NULL;
 
-				// Copy the forwarder name
-				Memcpy(cForwarderName, pFunctionAddress, strlen((PCHAR)pFunctionAddress));
+                // Copy the forwarder name
+                Memcpy(cForwarderName, pFunctionAddress, strlen((PCHAR)pFunctionAddress));
 
-				// Find the dot in the forwarder name
-				for (int i = 0; i < strlen((PCHAR)cForwarderName); i++) {
+                // Find the dot in the forwarder name
+                for (int i = 0; i < strlen((PCHAR)cForwarderName); i++) {
 
-					if (((PCHAR)cForwarderName)[i] == '.') {
-						dwDotOffset = i;
-						cForwarderName[i] = NULL;
-						break;
-					}
-				}
+                    if (((PCHAR)cForwarderName)[i] == '.') {
+                        dwDotOffset = i;
+                        cForwarderName[i] = 0;
+                        break;
+                    }
+                }
 
-				pcFunctionMod = cForwarderName;
-				pcFunctionName = cForwarderName + dwDotOffset + 1;
+                pcFunctionMod = cForwarderName;
+                pcFunctionName = cForwarderName + dwDotOffset + 1;
 
-				// Load the library and get the function address
-				fnLoadLibraryA pLoadLibraryA = (fnLoadLibraryA)GetProcAddressH(GetModuleHandleH(kernel32dll_CH, FALSE), LoadLibraryA_CH);
-				if (pLoadLibraryA)
-					return GetProcAddressH(pLoadLibraryA(pcFunctionMod), CHASH(pcFunctionName));
-			}
-			return (FARPROC)pFunctionAddress;
-		}
+                // Load the library and get the function address
+                fnLoadLibraryA pLoadLibraryA = (fnLoadLibraryA)GetProcAddressH(GetModuleHandleH(kernel32dll_CH, FALSE), LoadLibraryA_CH);
+                if (pLoadLibraryA)
+                    return GetProcAddressH(pLoadLibraryA(pcFunctionMod), CHASH(pcFunctionName));
+            }
+            return (FARPROC)pFunctionAddress;
+        }
 
-	}
+    }
 
-	return NULL;
+    return NULL;
 }
 
 HMODULE GetModuleHandleH(IN UINT32 uModuleHash, IN BOOL isKernel) {
