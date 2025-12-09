@@ -5,8 +5,8 @@
 
 // Object type definitions for process and thread
 typedef enum _PS_OBJECT_TYPE {
-    PsProcessType = 1,    // Process object type
-    PsThreadType = 2     // Thread object type
+	PsProcessType = 1,    // Process object type
+	PsThreadType = 2     // Thread object type
 } PS_OBJECT_TYPE;
 
 
@@ -16,6 +16,7 @@ INT64 GetPsProcessAndProcessTypeAddr(PS_OBJECT_TYPE objectType);
 
 
 VOID PrintAndClearCallBack(INT64 PspNotifyRoutineAddress, CHAR* CallBackRegFunc);
+VOID PrintAndClearCallBack(INT64 PspNotifyRoutineAddress, UINT32 CallBackRegFuncHash);
 
 
 VOID RemoveObRegisterCallbacks(INT64 PsProcessTypeAddr, PS_OBJECT_TYPE objectType);
