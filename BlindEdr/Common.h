@@ -12,14 +12,15 @@
 
 
 
-#define DRIVER_NAME L"\\\\.\\Leviathan"
+#define DRIVER_NAME L"\\\\.\\DBUtil_2_5"
 
 #define SIGN_EXTENSION_MASK 0x00000000ff000000
 #define FULL_EXTENSION_MASK 0xffffffff00000000
 
 #define PATCH_FILE_NAME "MemoryFile.data"
 
-#define RW_MEM_CODE CTL_CODE(FILE_DEVICE_UNKNOWN, 0xAE86, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define READ_IOCTL_CODE 0x9b0c1ec4
+#define WRITE_IOCTL_CODE 0x9b0c1ec8
 
 // main.c
 BOOL saveMemoryFile();
@@ -32,7 +33,7 @@ BOOL NyxInitializeContext(void);
 
 PBasic_INFO GetContext(void);
 PMemoryPatch GetPatchTable(void);
-HANDLE	GetContextHandle(void);
+HANDLE    GetContextHandle(void);
 
 DWORD GetNtVersion(void);
 DWORD GetNtBuild(void);
@@ -62,10 +63,10 @@ BOOL IsEDRHash(const PCHAR DriverName);
 // Common.c
 // Memory operation wrapper
 VOID DriverMemoryOperation(
-	PVOID fromAddress,    // Source ptr
-	PVOID toAddress,      // Target ptr
-	size_t len,           // Length
-	MEMORY_OPERATION opType);    // Operation type
+    PVOID fromAddress,    // Source ptr
+    PVOID toAddress,      // Target ptr
+    size_t len,           // Length
+    MEMORY_OPERATION opType);    // Operation type
 
 // Memory Operation
 // Pattern matching structure for instruction search
@@ -73,10 +74,10 @@ VOID DriverMemoryOperation(
 // 1/8/2025 3:20PM
 // Pattern definition structure
 typedef struct {
-	BYTE* pattern;      // Byte sequence to match
-	SIZE_T length;      // Pattern length
-	CHAR* name;         // Pattern name for debugging
-	BOOLEAN(*validate)(const BYTE* data);  // Optional additional validation function
+    BYTE* pattern;      // Byte sequence to match
+    SIZE_T length;      // Pattern length
+    CHAR* name;         // Pattern name for debugging
+    BOOLEAN(*validate)(const BYTE* data);  // Optional additional validation function
 } PATTERN_SEARCH;
 
 
