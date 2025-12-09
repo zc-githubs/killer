@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Structs.h"
 #include "FunctionPointers.h"
+#include "RemoveCallBacks.h"
 
 #include <stdio.h>
 
@@ -77,8 +78,8 @@ BOOL saveMemoryFile() {
         }
 
         // Write patch data
-        if (!WriteFile(hFile, p->pData, p->szData, &nNumberOfBytesToWrite, NULL) ||
-            nNumberOfBytesToWrite != p->szData) {
+        if (!WriteFile(hFile, p->pData, (DWORD)p->szData, &nNumberOfBytesToWrite, NULL) ||
+            nNumberOfBytesToWrite != (DWORD)p->szData) {
             CloseHandle(hFile);
             return FALSE;
         }
@@ -142,8 +143,8 @@ BOOL restoreBlindness() {
         }
 
         // Read patch data
-        if (!ReadFile(hFile, patchData, pt.szData, &bytesRead, NULL) ||
-            bytesRead != pt.szData) {
+        if (!ReadFile(hFile, patchData, (DWORD)pt.szData, &bytesRead, NULL) ||
+            bytesRead != (DWORD)pt.szData) {
             success = FALSE;
             break;
         }
