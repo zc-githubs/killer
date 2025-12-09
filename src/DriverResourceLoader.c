@@ -1,4 +1,6 @@
 #include "DriverResourceLoader.h"
+#include "driver_resource.h"
+#include <winternl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strsafe.h>
@@ -77,7 +79,7 @@ bool CreateUniqueTempFile(const wchar_t* prefix, const wchar_t* extension, wchar
         return false;
     }
 
-    if (StringFromGUID2(guid, guidStr, 40) <= 0)
+    if (StringFromGUID2(&guid, guidStr, 40) <= 0)
     {
         printf("[-] StringFromGUID2 failed\n");
         return false;
