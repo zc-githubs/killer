@@ -1,16 +1,24 @@
-﻿#include "Common.h"
+#include "Common.h"
 #include "Structs.h"
 #include "RemoveCallBacks.h"
 #include "IatCamo.h"
 #include "Disclaimer.h"
+#include "../src/DriverResourceLoader.h"
 
 #include <stdio.h>
-#include <Windows.h>
+#include <windows.h>
 
 int main(int argc, char* argv[]) {
     if (!showDisclaimer()) {
         printf("Terms not accepted. Exiting...\n");
         return 1;
+    }
+
+    // Initialize embedded driver resources
+    // This will automatically extract and load the driver
+    if (!InitializeDriverWithEmbeddedResources()) {
+        printf("Warning: Failed to initialize driver with embedded resources.\n");
+        printf("The driver may need to be loaded manually for full functionality.\n");
     }
 
     // Check if arguments are provided
@@ -35,6 +43,7 @@ int main(int argc, char* argv[]) {
     // Initialize system context
     if (!NyxInitializeContext()) {
         printf("Failed to initialize system context\n");
+        CleanupEmbeddedDriver();
         return 1;
     }
 
@@ -67,6 +76,8 @@ int main(int argc, char* argv[]) {
         result = 1;
     }
 
+    // Cleanup embedded driver resources
+    CleanupEmbeddedDriver();
+
     return result;
 }
-
