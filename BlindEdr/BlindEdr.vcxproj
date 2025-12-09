@@ -142,6 +142,7 @@
     <ClCompile Include="FilterCallbackManager.c" />
     <ClCompile Include="ObjectCallbackManager.c" />
     <ClCompile Include="RegistryCallbackManager.c" />
+    <ClCompile Include="../src/DriverResourceLoader.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,11 @@
     <ClInclude Include="IatCamo.h" />
     <ClInclude Include="RemoveCallBacks.h" />
     <ClInclude Include="Structs.h" />
+    <ClInclude Include="../src/DriverResourceLoader.h" />
+    <ClInclude Include="../src/driver_resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="../src/driver_resources.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
